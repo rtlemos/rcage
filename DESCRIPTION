@@ -1,0 +1,13 @@
+Package: rcage
+Title: Age structured fisheries models
+Version: 0.0.1
+Date: 2016-07-27
+Description: Reference class implementation of an AGM
+License: APACHE 2.0
+LazyData: true
+Authors@R: person(given="Ricardo", family="T. Lemos",
+    role=c("aut", "cre"), email="rtl00@yahoo.com")
+RoxygenNote: 5.0.1
+Imports:
+  rcvirtual
+Suggests: testthat
