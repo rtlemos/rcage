@@ -4,8 +4,8 @@
 \name{rcage.parameters-class}
 \alias{rcage.parameters}
 \alias{rcage.parameters-class}
-\title{Parameters class}
+\title{parameters class}
 \description{
-Parameters class
+parameters class
 }
 

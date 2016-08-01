@@ -4,8 +4,8 @@
 \name{rcage.strategy-class}
 \alias{rcage.strategy}
 \alias{rcage.strategy-class}
-\title{Strategy class}
+\title{strategy class}
 \description{
-Strategy class
+strategy class
 }
 

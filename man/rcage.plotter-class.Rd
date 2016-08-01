@@ -4,8 +4,8 @@
 \name{rcage.plotter-class}
 \alias{rcage.plotter}
 \alias{rcage.plotter-class}
-\title{Plotter class}
+\title{plotter class}
 \description{
-Plotter class
+plotter class
 }
 
