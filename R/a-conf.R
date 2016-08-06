@@ -37,11 +37,12 @@ rcage.conf <- setRefClass(
       sk <- function(name) {
         as.numeric(mapply(name, FUN = function(name) which(df$name == name)))
       }
-      df$in.model[sk(c('Y', 'E', 't', 'U', 'G', 'phi', 'rho', 'xi', 
-                       'chi', 'theta', 'chi'))] <- TRUE
+      df$in.model[sk(c('Y', 'E', 't', 'c', 'm', 'u', 's',
+                       'U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l', 
+                       'phi', 'rho', 'xi', 'chi', 'theta'))] <- TRUE
       
-      df$type[sk(c('Y', 'E', 't'))] <- 'fixed'
-      df$type[sk(c('U', 'G'))] <- 'derived'
+      df$type[sk(c('Y', 'E', 't', 'c', 'm', 'u', 's'))] <- 'fixed'
+      df$type[sk(c('U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l'))] <- 'derived'
       df$type[sk(c('phi', 'rho', 'xi', 'chi'))] <- 'unknown'
       df$type[sk('theta')] <- 'processes'
       df$type[sk('chi')] <- 'conjugate normal parameter'
@@ -73,10 +74,6 @@ rcage.conf <- setRefClass(
       df$long.name[sk('xi')] <- 'natural mortality rate'
       df$long.name[sk('theta')] <- 'log-abundance at age'
       df$long.name[sk('chi')] <- 'log-catchability'
-
-      df$is.spatial.avg[sk('Y')] <- TRUE
-
-      df$store.in.ram[sk('Y')] <- TRUE
 
       df$units[sk('t')] <- 'year'
 

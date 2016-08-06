@@ -6,5 +6,5 @@
 #'
 rcage.plotter <- setRefClass(
   Class = 'rcage.plotter',
-  contains = 'rcvirtual.plotter'
+  contains = 'rcvirtual.ggplotter'
 )

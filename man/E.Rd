@@ -3,7 +3,8 @@
 \docType{data}
 \name{E}
 \alias{E}
-\title{Nominal fishing effort of the Gulf menhaden reduction fishery}
+\title{Nominal fishing effort of the gulf menhaden reduction fishery in the U.S.
+Gulf of Mexico, 1964-2004.}
 \format{A data frame with 41 rows and 1 columns
 \describe{
   \item{effort}{annual estimated nominal effort}
@@ -16,8 +17,8 @@ E
 }
 \description{
 A data set containing nominal effort, in 1000 vessel-tonne-weeks, associated
-with the US menhaden reduction fishery in the Gulf of Mexico
-Extracted from Table 2 of Vaughan et al., 2007, Fish. Res. 83, 263-275
+with the US menhaden reduction fishery in the Gulf of Mexico.
+Extracted from Table 2 of Vaughan et al., 2007, Fish. Res. 83, 263-275.
 }
 \keyword{datasets}
 
