@@ -8,4 +8,55 @@
 \description{
 strategy class
 }
+\section{Methods}{
+
+\describe{
+\item{\code{get.compute.alpha()}}{Selectivity function intercept}
+
+\item{\code{get.compute.chi()}}{Log-catchability}
+
+\item{\code{get.compute.d(u)}}{Number of cohorts (nC)}
+
+\item{\code{get.compute.E()}}{Effort data}
+
+\item{\code{get.compute.eta()}}{Selectivity function slope}
+
+\item{\code{get.compute.G(d, m, s, phi)}}{Transition matrix}
+
+\item{\code{get.compute.h()}}{Initial system variance}
+
+\item{\code{get.compute.i(d)}}{Initial mean of state vector}
+
+\item{\code{get.compute.l(r, v, d)}}{Likelihood}
+
+\item{\code{get.compute.m()}}{Age at maturity (aM)}
+
+\item{\code{get.compute.o()}}{Measurement error variance}
+
+\item{\code{get.compute.omega()}}{System error variance}
+
+\item{\code{get.compute.phi()}}{Elasticity}
+
+\item{\code{get.compute.q(u, eta, alpha)}}{Selectivity function}
+
+\item{\code{get.compute.r(t, v, G, Y, E, U, q, d, chi, rho, xi)}}{System mean vectors}
+
+\item{\code{get.compute.rho()}}{Log-carrying capacity}
+
+\item{\code{get.compute.s(m, u)}}{Mean spawning age (aS)}
+
+\item{\code{get.compute.t()}}{Time bounds}
+
+\item{\code{get.compute.theta(r, v)}}{Log-abundance}
+
+\item{\code{get.compute.u()}}{Species longevity (aU)}
+
+\item{\code{get.compute.U(d, s, phi)}}{System intercept vector}
+
+\item{\code{get.compute.v(t, h, o, d, G, omega)}}{System variance matrices}
+
+\item{\code{get.compute.xi()}}{Natural mortality rate}
+
+\item{\code{get.compute.Y()}}{Log-CPUE data}
+}}
 

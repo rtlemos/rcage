@@ -20,68 +20,162 @@ rcage.strategy <- setRefClass(
     # --------------------------------------------------------------------------
     # - Get methods ------------------------------------------------------------
     # --------------------------------------------------------------------------
-    get.compute.U = function(c, s, phi) {
-      # data
-      nC <- .self$get.data(long.name = 'nC')
-      aS <- .self$get.data(long.name = 'aS')
-      phi <- .self$get.data(param.name = 'phi')
-      # computing
-      U <- c(-aS * (1 - phi), rep(1, nC - 1))
-      # storing
+    
+    get.compute.theta = function(r, v) {
+      'Log-abundance'
+      
+      theta <- list(type = 'unknown', mean = r, var = v)
+      return(phi)
+    },
+    
+    get.compute.phi = function() {
+      'Elasticity'
+      
+      phi <- list(type = 'unknown', lb = 0, ub = 1)
+      return(phi)
+    },
+    
+    get.compute.rho = function() {
+      'Log-carrying capacity'
+      
+      rho <- list(type = 'unknown', lb = 0, ub = 1)
+      return(rho)
+    },
+    
+    get.compute.xi = function() {
+      'Natural mortality rate'
+      
+      xi <- list(type = 'unknown', lb = 0, ub = 0.4)
+      return(xi)
+    },
+    
+    get.compute.chi = function() {
+      'Log-catchability'
+      
+      chi <- list(type = 'unknown', lb = -7, ub = -1)
+      return(chi)
+    },
+    
+    get.compute.Y = function() {
+      'Log-CPUE data'
+      
+      return(2) #RTL TODO
+    },
+    
+    get.compute.E = function() {
+      'Effort data'
+      
+      return(1) #RTL TODO
+    },
+    
+    get.compute.u = function() {
+      'Species longevity (aU)'
+      
+      return(7)
+    },
+    
+    get.compute.d = function(u) {
+      'Number of cohorts (nC)'
+      
+      d <- u + 1
+      return(d)
+    },
+    
+    get.compute.m = function() {
+      'Age at maturity (aM)'
+      
+      return(2)
+    },
+    
+    get.compute.s = function(m, u) {
+      'Mean spawning age (aS)'
+      
+      s <- 0.5 * (m + u)
+      return(s)
+    },
+    
+    get.compute.h = function() {
+      'Initial system variance'
+      
+      h <- 1
+      return(h)
+    },
+    
+    get.compute.o = function() {
+      'Measurement error variance'
+      
+      o <- 1
+      return(o)
+    },
+    
+    get.compute.t = function() {
+      'Time bounds'
+      
+      t.posix <- as.POSIXlt(c('1964/01/01', '2004/01/01'), tz = 'GMT')
+      t.bnd <- as.numeric(t.posix)
+      return(t.bnd)
+    },
+    
+    get.compute.U = function(d, s, phi) {
+      'System intercept vector'
+      
+      U <- c(-s * (1 - phi), rep(1, d - 1))
       return(U)
     },
     
-    get.compute.G = function(c, m, u, s, phi) {
-      # data
-      nC <- .self$get.data(long.name = 'nC')
-      aM <- .self$get.data(long.name = 'aM')
-      aU <- .self$get.data(long.name = 'aU')
-      nS <- .self$get.data(long.name = 'nS')
-      phi <- .self$get.data(param.name = 'phi')
-      # computing
-      G <- matrix(nrow = nC, ncol = nC, 0)
-      G[2:nC, 1:(nC - 1)] <- 1
-      G[1, (aM + 1):(aU + 1)] <- (1 - phi) / nS
+    get.compute.G = function(d, m, s, phi) {
+      'Transition matrix'
+      
+      G <- matrix(nrow = d, ncol = d, 0)
+      for(i in 2:d) G[i, i - 1] <- 1
+      G[1, (m + 1):d] <- (1 - phi) / s
       return(G)
     },
     
-    get.compute.i = function(c) {
-      # data
-      nC <- .self$get.data(long.name = 'nC')
-      # computing
-      i <- rep(0, nC)
+    get.compute.i = function(d) {
+      'Initial mean of state vector'
+      
+      i <- rep(0, d)
       return(i)
     },
     
-    get.q = function(c, eta, alpha) {
-      # data
-      nC <- .self$get.data(long.name = 'nC')
-      eta <- .self$get.data(param.name = 'eta')
-      alpha <- .self$get.data(param.name = 'alpha')
-      # computing
-      age <- c(1:nC)
+    get.compute.q = function(u, eta, alpha) {
+      'Selectivity function'
+
+      age <- c(0:u)
       q <- 1 / (1 + exp(-eta * (age - alpha)))
       return(q)
     },
     
-    get.compute.v = function(t, h, o, c, G) {
-      # data
-      tvec <- .self$get.data(param.name = 't')
-      h <- .self$get.data(param.name = 'h')
-      o <- .self$get.data(long.name = 'o')
-      G <- .self$get.data(param.name = 'G')
-      nc <- .self$get.data(param.name = 'nC')
-      omega <- .self$get.data(param.name = 'omega')
+    get.compute.eta = function() {
+      'Selectivity function slope'
       
-      # computing
-      nt <- length(tvec)
+      eta <- list(type = 'unknown', mean = 0, var = 1)
+    },
+    
+    get.compute.omega = function() {
+      'System error variance'
+      
+      omega <- list(type = 'unknown', mean = 0, var = 1)
+    },
+    
+    get.compute.alpha = function() {
+      'Selectivity function intercept'
+      
+      alpha <- list(type = 'unknown', mean = 0, var = 1)
+    },
+    
+    get.compute.v = function(t, h, o, d, G, omega) {
+      'System variance matrices'
+      
+      nt <- length(t)
       V <- Rinv <- Q <- vector('list', length = nt)
-      O <- diag(o, nC, nC)
-      Oinv <- diag(1 / o, nC, nC)
-      eps <- diag(0.0001, nC, nC)
-      W <- diag(omega, nC, nC)
+      O <- diag(o, d, d)
+      Oinv <- diag(1 / o, d, d)
+      eps <- diag(0.0001, d, d)
+      W <- diag(omega, d, d)
       tG <- t(G)
-      R <- G %*% diag(h, nC, nC) %*% tG + W
+      R <- G %*% diag(h, d, d) %*% tG + W
       tt <- 1
       Q[[tt]] <- R + O
       Rinv[[tt]] <- solve(R)
@@ -98,27 +192,20 @@ rcage.strategy <- setRefClass(
       return(v)
     },
     
-    get.compute.r = function(t, v, G, Y, E, q, c) {
-      # data
-      tvec <- .self$get.data(param.name = 't')
-      v <- .self$get.data(param.name = 'v')
-      G <- .self$get.data(param.name = 'G')
-      Y <- .self$get.data(param.name = 'Y')
-      E <- .self$get.data(param.name = 'E')
-      q <- .self$get.data(param.name = 'q')
-      nc <- .self$get.data(long.name = 'nC')
-      # computing
-      nt <- length(tvec)
+    get.compute.r = function(t, v, G, Y, E, U, q, d, chi, rho, xi) {
+      'System mean vectors'
+      
+      nt <- length(t)
       echi <- exp(chi)
-      intercept <- rep(rho + chi, nC)
+      intercept <- rep(rho + chi, d)
       m <- a <- e <- vector('list', length = nt)
       tt <- 1
-      a[[tt]] <- G %*% rep(0, nC) - zeta * U - echi * q * E[1]
+      a[[tt]] <- G %*% rep(0, d) - xi * U - echi * q * E[1]
       f <- intercept + a[[tt]]
       e[[tt]] <- Y[, tt] - f
       m[[tt]] <- v$V[[tt]] %*% (v$Rinv[[tt]] %*% a[[tt]] + Y[, tt] / o)
       for (tt in 2:nt) {
-        a[[tt]] <- G %*% rep(0, nC) - zeta * U - echi * q * E[tt - 1]
+        a[[tt]] <- G %*% rep(0, d) - xi * U - echi * q * E[tt - 1]
         f <- intercept + a[[tt]]
         e[[tt]] <- Y[, tt] - f
         m[[tt]] <- v$V[[tt]] %*% (v$Rinv[[tt]] %*% a[[tt]] + Y[, tt] / o)
@@ -127,13 +214,10 @@ rcage.strategy <- setRefClass(
       return(r)
     },
     
-    get.compute.l = function(r, v, c) {
-      # data
-      r <- .self$get.data(param.name = 'r')
-      v <- .self$get.data(param.name = 'v')
-      nc <- .self$get.data(long.name = 'nC')
-      # computing
-      clog2pi <- nC * log(2 * pi)
+    get.compute.l = function(r, v, d) {
+      'Likelihood'
+      
+      clog2pi <- d * log(2 * pi)
       partial.llik <- mapply(r$e, v$Q, FUN = function(et, Qt) {
         -0.5 * (clog2pi + det(Qt) + as.numeric(crossprod(et, solve(Qt, et))))
       })

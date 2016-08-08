@@ -8,7 +8,7 @@ LazyData: true
 Authors@R: person(given = 'Ricardo', family = 'T. Lemos', 
   role = c('aut', 'cre'), email = 'rtl00@yahoo.com')
 RoxygenNote: 5.0.1
-Imports:
+Inports:
   rcvirtual,
   shiny
 Suggests:

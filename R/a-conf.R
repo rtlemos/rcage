@@ -37,20 +37,26 @@ rcage.conf <- setRefClass(
       sk <- function(name) {
         as.numeric(mapply(name, FUN = function(name) which(df$name == name)))
       }
-      df$in.model[sk(c('Y', 'E', 't', 'c', 'm', 'u', 's',
+      df$in.model[sk(c('Y', 'E', 't', 'd', 'm', 'u', 's',
                        'U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l', 
-                       'phi', 'rho', 'xi', 'chi', 'theta'))] <- TRUE
+                       'phi', 'rho', 'xi', 'chi', 'theta', 'alpha', 'eta', 'omega'))] <- TRUE
       
-      df$type[sk(c('Y', 'E', 't', 'c', 'm', 'u', 's'))] <- 'fixed'
+      df$type[sk(c('Y', 'E', 't', 'd', 'm', 'u', 's'))] <- 'fixed'
       df$type[sk(c('U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l'))] <- 'derived'
-      df$type[sk(c('phi', 'rho', 'xi', 'chi'))] <- 'unknown'
+      df$type[sk(c('phi', 'rho', 'xi', 'chi', 'alpha', 'eta', 'omega'))] <- 'unknown'
       df$type[sk('theta')] <- 'processes'
       df$type[sk('chi')] <- 'conjugate normal parameter'
 
+      df$initial[sk('d')] <- 7
       df$initial[sk('phi')] <- 0.5
       df$initial[sk('rho')] <- 5
       df$initial[sk('xi')] <- 0.1
       df$initial[sk('chi')] <- -4
+      df$initial[sk('u')] <- 6
+      df$initial[sk('m')] <- 2
+      df$initial[sk('omega')] <- 1
+      df$initial[sk('eta')] <- 0
+      df$initial[sk('alpha')] <- 0
 
       df$lbound[sk('phi')] <- 0
       df$lbound[sk('rho')] <- 0
@@ -64,6 +70,7 @@ rcage.conf <- setRefClass(
       df$ubound[sk('chi')] <- -1
       df$ubound[sk('t')] <- t.bnd[2]
 
+      df$long.name[sk('d')] <- 'nC = number of cohorts'
       df$long.name[sk('Y')] <- 'log-cpue'
       df$long.name[sk('U')] <- 'system intercept'
       df$long.name[sk('G')] <- 'evolution matrix'
