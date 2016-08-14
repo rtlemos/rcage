@@ -39,15 +39,15 @@ strategy class
 
 \item{\code{get.compute.q(u, eta, alpha)}}{Selectivity function}
 
-\item{\code{get.compute.r(t, v, G, Y, E, U, q, d, chi, rho, xi)}}{System mean vectors}
+\item{\code{get.compute.r(t, v, G, Y, E, U, q, d, o, chi, rho, xi)}}{System mean vectors}
 
 \item{\code{get.compute.rho()}}{Log-carrying capacity}
 
 \item{\code{get.compute.s(m, u)}}{Mean spawning age (aS)}
 
-\item{\code{get.compute.t()}}{Time bounds}
+\item{\code{get.compute.t()}}{Time}
 
-\item{\code{get.compute.theta(r, v)}}{Log-abundance}
+\item{\code{get.compute.theta(r, v, t, G)}}{Log-abundance}
 
 \item{\code{get.compute.u()}}{Species longevity (aU)}
 

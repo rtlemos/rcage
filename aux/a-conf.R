@@ -39,7 +39,8 @@ rcage.conf <- setRefClass(
       }
       df$in.model[sk(c('Y', 'E', 't', 'd', 'm', 'u', 's',
                        'U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l', 
-                       'phi', 'rho', 'xi', 'chi', 'theta', 'alpha', 'eta', 'omega'))] <- TRUE
+                       'phi', 'rho', 'xi', 'chi', 'theta', 'alpha', 'eta', 
+                       'omega'))] <- TRUE
       
       df$type[sk(c('Y', 'E', 't', 'd', 'm', 'u', 's'))] <- 'fixed'
       df$type[sk(c('U', 'G', 'q', 'h', 'o', 'i', 'v', 'r', 'l'))] <- 'derived'
