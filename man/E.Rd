@@ -16,7 +16,7 @@ Gulf of Mexico, 1964-2004.}
 E
 }
 \description{
-A data set containing nominal effort, in 1000 vessel-tonne-weeks, associated
+A data set containing nominal effort, in vessel-tonne-weeks, associated
 with the US menhaden reduction fishery in the Gulf of Mexico.
 Extracted from Table 2 of Vaughan et al., 2007, Fish. Res. 83, 263-275.
 }

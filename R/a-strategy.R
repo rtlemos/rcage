@@ -31,207 +31,241 @@ rcage.strategy <- setRefClass(
                              prior.precision = v$R.inv,
                              evolution.matrix = G,
                              n.instants = length(t))
-      return(theta)
     },
     
     get.compute.phi = function() {
       'Elasticity'
       
-      phi <- Uniform(name = 'elasticity', lb = 0, ub = 1)
-      return(phi)
+      phi <- Uniform(name = 'elasticity', lb = 0.02, ub = 0.98)
     },
     
     get.compute.rho = function() {
       'Log-carrying capacity'
       
-      rho <- Uniform(name = 'log-K', lb = 0, ub = 1)
-      return(rho)
+      # rho <- TruncatedNormal(name = 'log-K', lb = 3, ub = 30,
+      #                        mean = 9, var = 9)
+      rho <- Uniform(name = 'log-K', lb = 0, ub = 35)
+      # rho <- Constant(9)
     },
     
     get.compute.xi = function() {
       'Natural mortality rate'
       
-      xi <- Uniform(name = 'natural mortality rate', lb = 0, ub = 0.4)
-      return(xi)
+      #xi <- Uniform(name = 'natural mortality rate', lb = 0.01, ub = 2.5)
+      xi <- TruncatedNormal(name = 'natural mortality rate', 
+                            mean = 1.1, var = 0.1, lb = 0.7, ub = 3.06)
     },
     
     get.compute.chi = function() {
       'Log-catchability'
       
-      chi <- Uniform(name = 'log-catchability', lb = -7, ub = -1)
-      return(chi)
+      #chi <- Uniform(name = 'log-catchability', lb = -20, ub = 0)
+      chi <- TruncatedNormal(name = 'log-catchability', lb = -20, ub = 0,
+                             mean = -10, var = 1)
+      # chi <- Constant(-0.01)
     },
     
-    get.compute.Y = function() {
-      'Log-CPUE data'
+    get.compute.C = function() {
+      'Catch data'
       
-      Y <- Constant(name = 'log-cpue', path = paste0(tempdir(), '/Y.RData'))
-      return(Y)
+      C <- Constant(name = 'catches', path = paste0(tempdir(), '/C.RData'))
     },
     
     get.compute.E = function() {
       'Effort data'
       
       E <- Constant(name = 'effort', path = paste0(tempdir(), '/E.RData'))
-      return(E)
+    },
+    
+    get.compute.aR = function() {
+      'Age at recruitment'
+      
+      aR <- Constant(0)
     },
     
     get.compute.aU = function() {
       'Species longevity'
       
       aU <- Constant(6)
-      return(aU)
     },
     
     get.compute.nC = function(aU) {
       'Number of cohorts (nC)'
       
       nC <- aU + 1
-      return(nC)
     },
     
     get.compute.aM = function() {
       'Age at maturity (aM)'
       
       aM <- Constant(2)
-      return(aM)
     },
     
     get.compute.aS = function(aM, aU) {
       'Mean spawning age'
       
       aS <- 0.5 * (aM + aU)
-      return(aS)
+    },
+    
+    get.compute.nS = function(aM, aU) {
+      'Mean spawning age'
+      
+      nS <- aU - aM + 1
     },
     
     get.compute.h = function() {
       'Initial system variance'
       
-      h <- Constant(1)
-      return(h)
+      h <- Constant(16)
     },
     
     get.compute.o = function() {
       'Measurement error variance'
       
-      o <- Constant(1)
-      return(o)
+      # log(1+0.04^2), where CV[x]=4% is the CV reported by Vauhgan et al
+      # and the expression comes from the use of cpue~LogNormal (see wikipedia)
+      o <- TruncatedNormal(name = 'cpue error variance', lb = -7, ub = 1,
+                           mean = -6.44, var = 9)
     },
     
     get.compute.t = function() {
       'Time'
       
       t <- Time(lb = '1964/01/01', ub = '2004/01/01', step = 'year')
-      return(t)
     },
     
     get.compute.U = function(nC, aS, phi) {
       'System intercept vector'
       
       U <- c(-aS * (1 - phi), rep(1, nC - 1))
-      return(U)
     },
     
-    get.compute.G = function(nC, aM, aS, phi) {
+    get.compute.G = function(nC, aM, nS, phi) {
       'Transition matrix'
       
       G <- matrix(nrow = nC, ncol = nC, 0)
       for(i in 2:nC) G[i, i - 1] <- 1
-      G[1, (aM + 1):nC] <- (1 - phi) / aS
+      G[1, (aM + 1):nC] <- (1 - phi) / nS
       return(G)
     },
     
-    get.compute.i = function(nC) {
+    get.compute.iniM = function(aR, aS, aU, phi, xi, chi) {
       'Initial mean of state vector'
       
-      i <- rep(0, nC)
-      return(i)
-    },
-    
-    get.compute.q = function(aU, eta, alpha) {
-      'Selectivity function'
-
-      age <- c(0:aU)
-      q <- 1 / (1 + exp(-eta * (age - alpha)))
-      return(q)
-    },
-    
-    get.compute.eta = function() {
-      'Selectivity function slope'
-      
-      eta <- Normal(name = 'selectivity slope', mean = 0, var = 1)
-    },
-    
-    get.compute.omega = function() {
-      'System error variance'
-      
-      omega <- InverseGamma(name = 'system variance', rate = 3, shape = 1)
+      k <- (1 - phi) / phi * (aS - aR)
+      echi <- exp(chi)
+      iniM <- mapply(0:aU, FUN = function(age) {
+        x <- -age * xi - k * echi * E[1, 1]
+        out <- if (age < aR) x else x - (age - aR) * echi * E[1, 1]
+        return(out)
+      })
+      #iniM <- mapply(0:aU, FUN = function(age) -xi * age )
+      return(iniM)
     },
     
     get.compute.alpha = function() {
       'Selectivity function intercept'
       
-      alpha <- Normal(name = 'selectivity intercept', mean = 0, var = 1)
+      # alpha <- TruncatedNormal(name = 'selectivity intercept', 
+      #                          lb = 0.5, ub = 2.5, mean = 2, var = 1)
+      alpha <- Uniform(name = 'selectivity intercept', lb = 0.5, ub = 2.5)
+      #alpha <- Constant(0.9)
     },
     
-    get.compute.v = function(t, h, o, nC, G, omega) {
+    get.compute.eta = function() {
+      'Selectivity function slope'
+      
+      # eta <- TruncatedNormal(name = 'selectivity slope', lb = 4, ub = 20,
+      #                        mean = 10, var = 4)
+      eta <- Uniform(name = 'selectivity slope', lb = 2, ub = 10)
+      #eta <- Constant(6)
+    },
+    
+    get.compute.s = function(aU, eta, alpha) {
+      'Selectivity function'
+
+      s <- 1 / (1 + exp(-eta * (c(0:aU) - alpha)))
+    },
+    
+    get.compute.omega = function() {
+      'System error variance'
+      
+      #omega <- InverseGamma(name = 'system variance', rate = 3, shape = 1)
+      #omega <- TruncatedNormal(name = 'system variance', 
+      #                         mean = 0, var = 9, lb = -20, ub = 20)
+      omega <- Uniform(name = 'system variance', lb = -20, ub = 20)
+    },
+    
+    get.compute.v = function(t, h, o, nC, G, omega, C) {
       'System variance matrices'
       
       nt <- length(t)
+      eo <- exp(o)
       V <- R.inv <- Q <- vector('list', length = nt)
-      O <- diag(o, nC, nC)
-      Oinv <- diag(1 / o, nC, nC)
+      O <- diag(eo, nC, nC)
       eps <- diag(0.0001, nC, nC)
-      W <- diag(omega, nC, nC)
+      W <- diag(exp(omega), nC, nC)
       tG <- t(G)
       R <- G %*% diag(h, nC, nC) %*% tG + W
       tt <- 1
-      Q[[tt]] <- R + O
+      ok <- !is.na(C[tt, ])
+      Q[[tt]] <- (R + O)[ok, ok]
       R.inv[[tt]] <- solve(R)
-      vm <- solve(R.inv[[tt]] + Oinv)
+      vm <- solve(R.inv[[tt]] + diag(ok / eo, nC, nC))
       V[[tt]] <- 0.5 * vm + 0.5 * t(vm) + eps
       for (tt in (2:nt)) {
         R <- G %*% V[[tt - 1]] %*% tG + W
-        Q[[tt]] <- R + O
+        ok <- !is.na(C[tt, ])
+        Q[[tt]] <- (R + O)[ok, ok]
         R.inv[[tt]] <- solve(R)
-        vm <- solve(R.inv[[tt]] + Oinv)
+        vm <- solve(R.inv[[tt]] + diag(ok / eo, nC, nC))
         V[[tt]] <- 0.5 * vm + 0.5 * t(vm) + eps
       }
       v <- list(V = V, R.inv = R.inv, Q = Q)
       return(v)
     },
     
-    get.compute.r = function(t, v, G, Y, E, U, q, nC, o, chi, rho, xi) {
+    get.compute.r = function(t, v, G, C, E, U, s, nC, iniM, o, 
+                             chi, rho, xi) {
       'System mean vectors'
       
+      Y <- log(C / E[, 1])
       nt <- length(t)
       echi <- exp(chi)
+      eo <- exp(o)
       intercept <- rep(rho + chi, nC)
-      m <- a <- e <- Y
+      m <- a <- err <- f <- matrix(nrow = nrow(Y), ncol = ncol(Y))
       tt <- 1
-      a[tt,] <- G %*% rep(0, nC) - xi * U - echi * q * E[1, 1]
-      f <- intercept + a[tt,]
-      e[tt,] <- Y[tt, ] - f
-      m[tt,] <- v$V[[tt]] %*% (v$R.inv[[tt]] %*% a[tt,] + Y[tt, ] / o)
+      a[tt,] <- G %*% iniM - xi * U - echi * s * E[1, 1]
+      f[tt,] <- intercept + a[tt,] + log(s)
+      ok <- !is.na(Y[tt, ])
+      err[tt, ] <- Y[tt, ] - f[tt, ]
+      m[tt,] <- v$V[[tt]] %*% v$R.inv[[tt]] %*% a[tt,]
+      m[tt, ok] <- m[tt, ok] + 
+        v$V[[tt]][ok, ok] %*% ((Y[tt, ok] - intercept[ok] - log(s[ok])) / eo)
       for (tt in 2:nt) {
-        a[tt,] <- G %*% rep(0, nC) - xi * U - echi * q * E[tt - 1, 1]
-        f <- intercept + a[tt,]
-        e[tt,] <- Y[tt, ] - f
-        m[tt,] <- v$V[[tt]] %*% (v$R.inv[[tt]] %*% a[tt,] + Y[tt, ] / o)
+        a[tt,] <- G %*% m[tt - 1,] - xi * U - echi * s * E[tt - 1, 1]
+        f[tt,] <- intercept + a[tt,] + log(s)
+        ok <- !is.na(Y[tt, ])
+        err[tt, ] <- Y[tt, ] - f[tt, ]
+        m[tt,] <- v$V[[tt]] %*% v$R.inv[[tt]] %*% a[tt,]
+        m[tt, ok] <- m[tt, ok] + 
+          v$V[[tt]][ok, ok] %*% ((Y[tt, ok] - intercept[ok] - log(s[ok])) / eo)
       }
-      r <- list(a = a, e = e, m = m)
+      r <- list(a = a, f = f, err = err, m = m)
       return(r)
     },
     
     get.compute.l = function(r, v, nC) {
-      'Likelihood'
+      'Log-likelihood'
       
       clog2pi <- nC * log(2 * pi)
-      partial.llik <- mapply(1:length(v$Q), FUN = function(tt) {
+      partial.llik <- as.numeric(mapply(1:length(v$Q), FUN = function(tt) {
+        ok <- !is.na(r$err[tt, ])
         -0.5 * (clog2pi + determinant(v$Q[[tt]], logarithm = TRUE)$modulus + 
-                  as.numeric(crossprod(r$e[tt,], solve(v$Q[[tt]], r$e[tt,]))))
-      })
-      l <- sum(partial.llik)
+                  crossprod(r$err[tt, ok], solve(v$Q[[tt]], r$err[tt, ok])))
+      }))
+      l <- LogLikelihood(sum(partial.llik))
       return(l)
     }
     
